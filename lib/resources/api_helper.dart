@@ -1,7 +1,8 @@
-import 'dart:convert';
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
 import 'package:msil_task_login/resources/api_status.dart';
 import 'package:http/http.dart' as http;
 import 'package:msil_task_login/resources/common_secure_store.dart';
@@ -9,7 +10,7 @@ import 'package:msil_task_login/resources/common_secure_store.dart';
 class ApiBaseHelper extends ApiStatus {
   final String _baseUrl = "https://reqres.in/api/";
   Future<dynamic> get(String methodUri, [dynamic queryParam = '']) async {
-    var responseJson;
+    dynamic responseJson;
 
     try {
       String requestUrl = _baseUrl + methodUri + queryParam;
@@ -34,15 +35,15 @@ class ApiBaseHelper extends ApiStatus {
   Future<dynamic> post(String url, dynamic request) async {
     debugPrint(_baseUrl + url);
 
-    var responseJson;
+    dynamic responseJson;
 
-    var requestJson = jsonEncode(request);
-
+    //var requestJson = jsonEncode(request);
+    //debugPrint(requestJson);
     try {
       Map<String, String> headers = await _createHeaders();
       debugPrint(headers.toString());
       final response = await http.post(Uri.parse(_baseUrl + url),
-          headers: headers, body: requestJson);
+          headers: headers, body: request);
       var statusCode = response.statusCode;
       if (ApiStatus.successStatus.contains(statusCode)) {
         responseJson = response.body;

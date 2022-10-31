@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:msil_task_login/bloc/login_bloc.dart';
+import 'package:msil_task_login/repositories/login/login_repo.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:msil_task_login/ui/screens/contact/contact_page.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -6,61 +10,108 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     TextEditingController nameController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
-    return Padding(
-        padding: const EdgeInsets.all(10),
-        child: ListView(
-          children: <Widget>[
-            Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(10),
-                child: const Text(
-                  'Sample Task',
-                  style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 30),
-                )),
-            Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(10),
-                child: const Text(
-                  'Sign in',
-                  style: TextStyle(fontSize: 20),
-                )),
-            Container(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'User Name',
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-              child: TextField(
-                obscureText: true,
-                controller: passwordController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Password',
-                ),
-              ),
-            ),
-            Container(
-                height: 50,
-                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                child: ElevatedButton(
-                  child: const Text('Login'),
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => ContactPageList()));
-                  },
-                )),
-          ],
-        ));
+    return BlocProvider(
+      create: (context) => LoginBloc(RepositoryProvider.of<LoginRepo>(context))
+        ..add(LoginInitialEvent()),
+      child: Scaffold(
+        key: scaffoldKey,
+        body: BlocListener<LoginBloc, LoginState>(
+          listener: (context, state) {
+            if (state is LoginErrorState) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(state.errormessage!)));
+              // Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //         builder: (BuildContext context) => ContactPageList()));
+            }
+            if (state is LoginSuccessfulState) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Login successful')));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          const ContactPageList()));
+            }
+          },
+          child: BlocBuilder<LoginBloc, LoginState>(
+            builder: (context, state) {
+              if (state is LoginLoadingState) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is LoginInitialState || state is LoginErrorState) {
+                if (state is LoginInitialState) {
+                  nameController.text = state.emailadd;
+                }
+                return Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: ListView(
+                      children: <Widget>[
+                        Container(
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.all(10),
+                            child: const Text(
+                              'Sample Task',
+                              style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 30),
+                            )),
+                        Container(
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.all(10),
+                            child: const Text(
+                              'Sign in',
+                              style: TextStyle(fontSize: 20),
+                            )),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          child: TextField(
+                            controller: nameController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'User Name',
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                          child: TextField(
+                            obscureText: true,
+                            controller: passwordController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Password',
+                            ),
+                          ),
+                        ),
+                        Container(
+                            height: 50,
+                            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            child: ElevatedButton(
+                              child: const Text('Login'),
+                              onPressed: () {
+                                BlocProvider.of<LoginBloc>(context).add(
+                                    LoginReqEvent({
+                                  "email": nameController.text,
+                                  "password": passwordController.text
+                                }));
+                              },
+                            )),
+                      ],
+                    ));
+              }
+
+              return const SizedBox();
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
