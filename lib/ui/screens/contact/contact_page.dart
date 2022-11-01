@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:msil_task_login/bloc/contact_bloc.dart';
 import 'package:msil_task_login/bloc/contact_search_bloc.dart';
-import 'package:msil_task_login/model/contact/contact_model.dart';
+
 import 'package:msil_task_login/repositories/contacts/contacts_repo.dart';
 import 'package:msil_task_login/ui/screens/login/loginscreen.dart';
 
@@ -149,57 +149,69 @@ class _ContactPageListState extends State<ContactPageList> {
           Expanded(
             child: Container(
               margin: const EdgeInsets.all(12),
-              child: ListView.builder(
-                  itemCount: contactli.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Column(
-                      children: [
-                        Row(
+              child: contactli.length > 0
+                  ? ListView.builder(
+                      itemCount: contactli.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Column(
                           children: [
-                            const Padding(padding: EdgeInsets.only(left: 20)),
-                            Center(
-                              child: Container(
-                                height: 50,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      image:
-                                          NetworkImage(contactli[index].avatar),
-                                      fit: BoxFit.fill),
+                            Row(
+                              children: [
+                                const Padding(
+                                    padding: EdgeInsets.only(left: 20)),
+                                Center(
+                                  child: Container(
+                                    height: 50,
+                                    width: 50,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          image: NetworkImage(
+                                              contactli[index].avatar),
+                                          fit: BoxFit.fill),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                const Padding(
+                                    padding: EdgeInsets.only(left: 50)),
+                                Container(
+                                  alignment: Alignment.topLeft,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Padding(
+                                          padding: EdgeInsets.only(top: 20)),
+                                      Text(
+                                        "${contactli[index].firstName} ${contactli[index].lastName}",
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const Padding(
+                                          padding: EdgeInsets.only(top: 10)),
+                                      Text(
+                                        contactli[index].email,
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            const Padding(padding: EdgeInsets.only(left: 50)),
-                            Container(
-                              alignment: Alignment.topLeft,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Padding(
-                                      padding: EdgeInsets.only(top: 20)),
-                                  Text(
-                                    "${contactli[index].firstName} ${contactli[index].lastName}",
-                                    //style: page_textstyle,
-                                  ),
-                                  const Padding(
-                                      padding: EdgeInsets.only(top: 10)),
-                                  Text(
-                                    contactli[index].email,
-                                    //style: page_textstyle,
-                                  ),
-                                ],
-                              ),
+                            const Divider(
+                              color: Colors.white,
                             ),
                           ],
-                        ),
-                        const Divider(
-                          color: Colors.white,
-                        ),
-                      ],
-                    );
-                  }),
+                        );
+                      })
+                  : Center(
+                      child: Text(
+                        "No Data  Found",
+                      ),
+                    ),
             ),
           ),
         ],
