@@ -16,5 +16,26 @@ class ContactBloc extends Bloc<ContactEvent, ContactState> {
         emit(ContactLoadedState(contactdetails));
       } catch (e) {}
     });
+    on<ContactSearchingEvent>((event, emit) async {
+      try {
+        dynamic values = event.contactli;
+        List searchvalues = [];
+        emit(ContactLoadingState());
+        for (int i = 0; i < values.data.length; i++) {
+          if ((values.data[i].firstName + " " + values.data[i].lastName)
+              .toString()
+              .toLowerCase()
+              .contains(event.searchtext!.toLowerCase())) {
+            searchvalues.add(values.data[i]);
+          }
+        }
+        emit(ContactSearchListState(searchvalues));
+      } catch (e) {}
+    });
+    on<ContactLoadedEvent>((event, emit) async {
+      try {
+        emit(ContactLoadedState(event.contactdetails));
+      } catch (e) {}
+    });
   }
 }

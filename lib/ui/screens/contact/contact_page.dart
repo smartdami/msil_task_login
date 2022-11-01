@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:msil_task_login/bloc/contact_bloc.dart';
+import 'package:msil_task_login/bloc/contact_search_bloc.dart';
 import 'package:msil_task_login/model/contact/contact_model.dart';
 import 'package:msil_task_login/repositories/contacts/contacts_repo.dart';
 import 'package:msil_task_login/ui/screens/login/loginscreen.dart';
@@ -13,26 +14,55 @@ class ContactPageList extends StatefulWidget {
 }
 
 class _ContactPageListState extends State<ContactPageList> {
+  bool _isSearching = false;
+  dynamic contactli = [], contactlisearch = [];
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          ContactBloc(RepositoryProvider.of<ContactsRepo>(context))
-            ..add(ContactLoadingEvent()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              ContactBloc(RepositoryProvider.of<ContactsRepo>(context))
+                ..add(ContactLoadingEvent()),
+        ),
+        BlocProvider(
+            create: (context) =>
+                ContactSearchBloc()..add(ContactSearchInitialEvent())),
+      ],
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          title: const Center(
-              child: Text(
-            "Contacts",
-            style: TextStyle(color: Colors.black54),
-          )),
+          title: BlocBuilder<ContactSearchBloc, ContactSearchState>(
+            builder: (context, state) {
+              if (state is ContactSearchInitialState) {
+                return const Center(
+                    child: Text(
+                  "Contacts",
+                  style: TextStyle(color: Colors.black54),
+                ));
+              }
+              if (state is ContactSearchingSearchingState) {
+                return TextField(
+                  onChanged: (value) {
+                    BlocProvider.of<ContactBloc>(context)
+                        .add(ContactSearchingEvent(contactli, value));
+                  },
+                );
+              }
+
+              return const Center(
+                  child: Text(
+                "Contacts",
+                style: TextStyle(color: Colors.black54),
+              ));
+            },
+          ),
           leading: IconButton(
             onPressed: () {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (BuildContext context) => LoginScreen()));
+                      builder: (BuildContext context) => const LoginScreen()));
             },
             icon: Icon(
               Icons.menu,
@@ -40,13 +70,52 @@ class _ContactPageListState extends State<ContactPageList> {
             ),
           ),
           actions: [
-            IconButton(
-              onPressed: () {},
-              icon: Icon(
-                Icons.search,
-                color: Colors.grey.shade500,
-              ),
-            ),
+            BlocBuilder<ContactSearchBloc, ContactSearchState>(
+                builder: (context, state) {
+              if (state is ContactSearchInitialState) {
+                return IconButton(
+                    onPressed: () {
+                      BlocProvider.of<ContactSearchBloc>(context)
+                          .add(ContactSearchingSearchingEvent(contactli));
+                    },
+                    icon: Icon(
+                      Icons.search,
+                      color: Colors.grey.shade500,
+                    ));
+              }
+              if (state is ContactSearchingSearchingState) {
+                return IconButton(
+                  onPressed: () {
+                    BlocProvider.of<ContactBloc>(context)
+                        .add(ContactLoadedEvent(contactli));
+                    BlocProvider.of<ContactSearchBloc>(context)
+                        .add(ContactSearchInitialEvent());
+                  },
+                  icon: Icon(
+                    Icons.close,
+                    color: Colors.grey.shade500,
+                  ),
+                );
+              }
+              //       : IconButton(
+              //           onPressed: () {
+              //             BlocProvider.of<ContactSearchBloc>(context)
+              //                 .add(ContactSearchingEvent(contactli));
+              //           },
+              //           icon: Icon(
+              //             Icons.search,
+              //             color: Colors.grey.shade500,
+              //           ));
+              // }
+              return IconButton(
+                  onPressed: () {
+                    _isSearching = !_isSearching;
+                  },
+                  icon: Icon(
+                    Icons.search,
+                    color: Colors.grey.shade500,
+                  ));
+            }),
           ],
         ),
         body: BlocBuilder<ContactBloc, ContactState>(
@@ -54,7 +123,12 @@ class _ContactPageListState extends State<ContactPageList> {
             if (state is ContactLoadingState) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is ContactLoadedState) {
-              return contactList(state.contatdetails);
+              contactli = state.contatdetails;
+              contactlisearch = state.contatdetails;
+              return contactList(contactlisearch.data);
+            } else if (state is ContactSearchListState) {
+              contactlisearch = state.contatdetails;
+              return contactList(contactlisearch);
             }
             return Container();
           },
@@ -63,7 +137,7 @@ class _ContactPageListState extends State<ContactPageList> {
     );
   }
 
-  Widget contactList(ContactsModel contactdetails) {
+  Widget contactList(dynamic contactli) {
     return Container(
       color: const Color.fromARGB(148, 255, 251, 251),
       alignment: Alignment.topLeft,
@@ -76,7 +150,7 @@ class _ContactPageListState extends State<ContactPageList> {
             child: Container(
               margin: const EdgeInsets.all(12),
               child: ListView.builder(
-                  itemCount: contactdetails.data.length,
+                  itemCount: contactli.length,
                   itemBuilder: (BuildContext context, int index) {
                     return Column(
                       children: [
@@ -90,8 +164,8 @@ class _ContactPageListState extends State<ContactPageList> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   image: DecorationImage(
-                                      image: NetworkImage(
-                                          contactdetails.data[index].avatar),
+                                      image:
+                                          NetworkImage(contactli[index].avatar),
                                       fit: BoxFit.fill),
                                 ),
                               ),
@@ -106,13 +180,13 @@ class _ContactPageListState extends State<ContactPageList> {
                                   const Padding(
                                       padding: EdgeInsets.only(top: 20)),
                                   Text(
-                                    "${contactdetails.data[index].firstName} ${contactdetails.data[index].lastName}",
+                                    "${contactli[index].firstName} ${contactli[index].lastName}",
                                     //style: page_textstyle,
                                   ),
                                   const Padding(
                                       padding: EdgeInsets.only(top: 10)),
                                   Text(
-                                    contactdetails.data[index].email,
+                                    contactli[index].email,
                                     //style: page_textstyle,
                                   ),
                                 ],

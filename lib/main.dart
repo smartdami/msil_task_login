@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:msil_task_login/bloc/contact_search_bloc.dart';
 import 'package:msil_task_login/repositories/contacts/contacts_repo.dart';
 import 'package:msil_task_login/repositories/login/login_repo.dart';
 
@@ -18,16 +19,20 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(
           create: (context) => ContactsRepo(),
         ),
-         RepositoryProvider(
+        RepositoryProvider(
           create: (context) => LoginRepo(),
         ),
       ],
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
+      child: BlocProvider(
+        create: (context) => ContactSearchBloc(),
+        child: MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          debugShowCheckedModeBanner: false,
+          home: const Scaffold(body: LoginScreen()),
         ),
-        home: const Scaffold(body: LoginScreen()),
       ),
     );
   }

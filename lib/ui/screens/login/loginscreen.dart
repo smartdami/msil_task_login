@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:msil_task_login/bloc/login_bloc.dart';
 import 'package:msil_task_login/repositories/login/login_repo.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:msil_task_login/ui/screens/contact/contact_page.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -10,6 +10,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
     GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     TextEditingController nameController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
@@ -49,61 +50,81 @@ class LoginScreen extends StatelessWidget {
                 }
                 return Padding(
                     padding: const EdgeInsets.all(10),
-                    child: ListView(
-                      children: <Widget>[
-                        Container(
-                            alignment: Alignment.center,
+                    child: Form(
+                      key: _formKey,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      child: ListView(
+                        children: <Widget>[
+                          Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(10),
+                              child: const Text(
+                                'Sample Task',
+                                style: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 30),
+                              )),
+                          Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(10),
+                              child: const Text(
+                                'Sign in',
+                                style: TextStyle(fontSize: 20),
+                              )),
+                          Container(
                             padding: const EdgeInsets.all(10),
-                            child: const Text(
-                              'Sample Task',
-                              style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 30),
-                            )),
-                        Container(
-                            alignment: Alignment.center,
-                            padding: const EdgeInsets.all(10),
-                            child: const Text(
-                              'Sign in',
-                              style: TextStyle(fontSize: 20),
-                            )),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          child: TextField(
-                            controller: nameController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'User Name',
+                            child: TextFormField(
+                              validator: ((value) {
+                                if ((value != null || value != "") &&
+                                    !value!.contains("@")) {
+                                  return "Please Enter Email Address";
+                                }
+                                return null;
+                              }),
+                              controller: nameController,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: 'User Name',
+                              ),
                             ),
                           ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-                          child: TextField(
-                            obscureText: true,
-                            controller: passwordController,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'Password',
+                          Container(
+                            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                            child: TextFormField(
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                              obscureText: true,
+                              controller: passwordController,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: 'Password',
+                              ),
+                              validator: ((value) {
+                                if (value == null || value == "") {
+                                  return "Please Enter Password";
+                                }
+                              }),
                             ),
                           ),
-                        ),
-                        Container(
-                            height: 50,
-                            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                            child: ElevatedButton(
-                              child: const Text('Login'),
-                              onPressed: () {
-                                BlocProvider.of<LoginBloc>(context).add(
-                                    LoginReqEvent({
-                                  "email": nameController.text,
-                                  "password": passwordController.text
-                                }));
-                              },
-                            )),
-                      ],
+                          Container(
+                              height: 50,
+                              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                              child: ElevatedButton(
+                                child: const Text('Login'),
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    BlocProvider.of<LoginBloc>(context).add(
+                                        LoginReqEvent({
+                                      "email": nameController.text,
+                                      "password": passwordController.text
+                                    }));
+                                  }
+                                },
+                              )),
+                        ],
+                      ),
                     ));
               }
 

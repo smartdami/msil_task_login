@@ -7,13 +7,24 @@ abstract class ContactState extends Equatable {
   List<Object> get props => [];
 }
 
-class ContactLoadingState extends ContactState {}
+class ContactLoadingState extends ContactState {
+  @override
+  List<Object> get props => [];
+}
 
 class ContactLoadedState extends ContactState {
-  final dynamic contatdetails;
+  dynamic contatdetails;
 
   // ignore: prefer_const_constructors_in_immutables
   ContactLoadedState(this.contatdetails);
+  @override
+  List<Object> get props => [contatdetails];
+}
+
+class ContactSearchListState extends ContactState {
+  dynamic contatdetails;
+
+  ContactSearchListState(this.contatdetails);
   @override
   List<Object> get props => [contatdetails];
 }
