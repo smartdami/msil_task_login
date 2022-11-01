@@ -207,7 +207,7 @@ class _ContactPageListState extends State<ContactPageList> {
                           ],
                         );
                       })
-                  : Center(
+                  : const Center(
                       child: Text(
                         "No Data  Found",
                       ),

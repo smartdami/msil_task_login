@@ -10,7 +10,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
     GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     TextEditingController nameController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
@@ -51,7 +51,7 @@ class LoginScreen extends StatelessWidget {
                 return Padding(
                     padding: const EdgeInsets.all(10),
                     child: Form(
-                      key: _formKey,
+                      key: formKey,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       child: ListView(
                         children: <Widget>[
@@ -104,6 +104,8 @@ class LoginScreen extends StatelessWidget {
                               validator: ((value) {
                                 if (value == null || value == "") {
                                   return "Please Enter Password";
+                                } else {
+                                  return null;
                                 }
                               }),
                             ),
@@ -114,7 +116,7 @@ class LoginScreen extends StatelessWidget {
                               child: ElevatedButton(
                                 child: const Text('Login'),
                                 onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
+                                  if (formKey.currentState!.validate()) {
                                     BlocProvider.of<LoginBloc>(context).add(
                                         LoginReqEvent({
                                       "email": nameController.text,
